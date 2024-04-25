@@ -20,7 +20,9 @@ async function main() {
     const $ = cheerio.load(fs.readFileSync('index.html'));
     $('#activities').attr('src', activitiesURL);
     $('#menu').attr('src', menuURL);
-    fs.writeFileSync('index.html', $.html());
+
+    fs.mkdirSync('out');
+    fs.writeFileSync('out/index.html', $.html());
 }
 
 main();
