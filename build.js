@@ -1,4 +1,6 @@
+const fs = require('fs');
 const { chromium } = require('playwright');
+const cheerio = require('cheerio');
 
 async function main() {
     const browser = await chromium.launch();
@@ -13,9 +15,12 @@ async function main() {
     const menu = await page.waitForSelector(`[href*='menu-e'].bwg-a`);
     const menuURL = await menu.getAttribute('href');
 
-    console.log(activitiesURL);
-    console.log(menuURL);
     await browser.close();
+
+    const $ = cheerio.load(fs.readFileSync('index.html'));
+    $('#activities').attr('src', activitiesURL);
+    $('#menu').attr('src', menuURL);
+    fs.writeFileSync('index.html', $.html());
 }
 
 main();
