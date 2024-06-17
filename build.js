@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { chromium } = require('playwright');
-const cheerio = require('cheerio');
+const { Readable } = require('stream');
+const { finished } = require('stream/promises');
 
 async function main() {
     const browser = await chromium.launch();
@@ -16,13 +17,11 @@ async function main() {
     const menuURL = await menu.getAttribute('href');
 
     await browser.close();
-
-    const $ = cheerio.load(fs.readFileSync('index.html'));
-    $('#activities').attr('src', activitiesURL);
-    $('#menu').attr('src', menuURL);
-
+    
     fs.mkdirSync('out');
-    fs.writeFileSync('out/index.html', $.html());
+    fs.copyFileSync('index.html', 'out/index.html');
+    await finished(Readable.fromWeb((await fetch(activitiesURL)).body).pipe(fs.createWriteStream('out/activities.jpg')));
+    await finished(Readable.fromWeb((await fetch(menuURL)).body).pipe(fs.createWriteStream('out/menu.jpg')));
 }
 
 main();
